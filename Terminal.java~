@@ -1,0 +1,102 @@
+/*
+ * Each of the items are scanned in one at a time and then aggregated into a String representing everything that has been scanned in
+ * The pricing plan is stored in a map with a product key and value of a list of the pricing plans
+ * 
+ */ 
+import java.util.*;
+
+public class Terminal
+{
+  private Map<String, List<Product>> priceMap;
+  private String scannedItems = "";
+  
+  public void setPricing(Map<String, List<Product>> priceMap)
+  {
+    this.priceMap = priceMap;
+  }
+  private void scan(String product)
+  {
+    scannedItems = scannedItems + product;
+  }
+  public double getTotal()
+  {
+    double total = 0; 
+    //find out how many per product there are
+    Map<String, Integer> scannedItemsMap = new TreeMap<String, Integer>();
+    
+    for(int i = 0; i<scannedItems.length(); i++)
+    {
+      String item = scannedItems.substring(i, i+1);
+      Integer itemCount = scannedItemsMap.get(item);
+      if(itemCount == null)
+      {
+        scannedItemsMap.put(item, new Integer(1));
+      }
+      else
+      {
+        scannedItemsMap.put(item, itemCount.intValue() + 1);
+      }
+    }
+    
+    Set<String> keys = scannedItemsMap.keySet();
+    System.out.println(keys);
+    for(String key: keys)
+    {
+      System.out.println(key);
+      List<Product> pricingList = priceMap.get(key);
+      int productInstances = scannedItemsMap.get(key).intValue();
+      
+      for(int i = pricingList.size()-1; i>=0; i--)
+      {
+        Product product = pricingList.get(i);
+        total = total + productInstances/product.getQuantity() * product.getPrice();
+        productInstances = productInstances % product.getQuantity();
+      }
+    }
+    return total;
+  }
+
+   public static void main(String [] args)
+   {
+     Terminal terminal = new Terminal();
+     Map<String, List<Product>> map = new TreeMap<String, List<Product>>();
+     
+     Product aOne = new Product("A", 1, 2);
+     Product aTwo = new Product("A", 4, 7);
+     List<Product> productA = new LinkedList<Product>();
+     productA.add(aOne);
+     productA.add(aTwo);
+     
+     Product b = new Product("B", 1, 12 );
+     List<Product> productB = new LinkedList<Product>();
+     productB.add(b);
+     
+     Product cOne = new Product("C", 1, 1.25);
+     Product cTwo = new Product("C", 6, 6);
+     List<Product> productC = new LinkedList<Product>();
+     productC.add(cOne);
+     productC.add(cTwo);
+     
+     Product d = new Product("D", 1, .15);
+     List<Product> productD = new LinkedList<Product>();
+     productD.add(d);
+     
+     map.put("A", productA);
+     map.put("B", productB);
+     map.put("C", productC);
+     map.put("D", productD);
+     
+     terminal.setPricing(map);
+     
+     terminal.scan("A");
+     terminal.scan("B");
+     terminal.scan("C");
+     terminal.scan("D");
+     terminal.scan("A");
+     terminal.scan("B");
+     terminal.scan("A");
+     terminal.scan("A");
+
+     System.out.println( terminal.getTotal());
+   }
+}
